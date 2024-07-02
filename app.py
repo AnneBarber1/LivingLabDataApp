@@ -20,14 +20,14 @@ app = Flask(__name__)
 #with open('AppSecretKey.txt', 'r') as f:
 #    key = f.read()
 #app.secret_key = key
-CPC_DIR = 'CPCFiles'
-GPS_DIR = 'GPSFiles'
-MAP_DIR = 'templates/maps'
-DEL_DIR = 'deleted'
-CPC_DEL_DIR = DEL_DIR + '/' + CPC_DIR
-GPS_DEL_DIR = DEL_DIR + '/' + GPS_DIR
-OPC_DIR = 'OPCFiles'
-ALLOWED_EXTENSIONS = set(['csv'])
+#CPC_DIR = 'CPCFiles'
+#GPS_DIR = 'GPSFiles'
+#MAP_DIR = 'templates/maps'
+#DEL_DIR = 'deleted'
+#CPC_DEL_DIR = DEL_DIR + '/' + CPC_DIR
+#GPS_DEL_DIR = DEL_DIR + '/' + GPS_DIR
+#OPC_DIR = 'OPCFiles'
+#ALLOWED_EXTENSIONS = set(['csv'])
 #DATABASE = 'LivingLabDataApp.db'
 #assert os.path.exists(DATABASE), "Unable to locate database"
 #assert os.path.exists('StravaTokens.txt'), "Unable to locate Strava tokens"
@@ -36,38 +36,38 @@ ALLOWED_EXTENSIONS = set(['csv'])
 # If running locally (or index is the domain) set to blank, i.e. subd=""
 # If index is a subdomain, set as appropriate *including* leading slash, e.g. subd="/living-lab"
 #subd = "/living-lab"
-subd = ""
+#subd = ""
 
 # Create directories if needed:
-if not os.path.isdir(CPC_DIR):
-    os.mkdir(CPC_DIR)
-if not os.path.isdir(MAP_DIR):
-    os.mkdir(MAP_DIR)
-if not os.path.isdir(GPS_DIR):
-    os.mkdir(GPS_DIR)
-if not os.path.isdir(DEL_DIR):
-    os.mkdir(DEL_DIR)
-if not os.path.isdir(CPC_DEL_DIR):
-    os.mkdir(CPC_DEL_DIR)
-if not os.path.isdir(GPS_DEL_DIR):
-    os.mkdir(GPS_DEL_DIR)
-if not os.path.isdir(OPC_DIR):
-    os.mkdir(OPC_DIR)
+#if not os.path.isdir(CPC_DIR):
+#    os.mkdir(CPC_DIR)
+#if not os.path.isdir(MAP_DIR):
+#    os.mkdir(MAP_DIR)
+#if not os.path.isdir(GPS_DIR):
+#    os.mkdir(GPS_DIR)
+#if not os.path.isdir(DEL_DIR):
+#    os.mkdir(DEL_DIR)
+#if not os.path.isdir(CPC_DEL_DIR):
+#    os.mkdir(CPC_DEL_DIR)
+#if not os.path.isdir(GPS_DEL_DIR):
+#    os.mkdir(GPS_DEL_DIR)
+#if not os.path.isdir(OPC_DIR):
+#    os.mkdir(OPC_DIR)
 
 # Assertion error handling (flash error message, stay on uploads page)
 
 
-@app.errorhandler(AssertionError)
-def handle_errors(err):
-    flash('Error: ' + str(err), 'danger')
-    return redirect(subd + '/uploads')
+#@app.errorhandler(AssertionError)
+#def handle_errors(err):
+#    flash('Error: ' + str(err), 'danger')
+#    return redirect(subd + '/uploads')#
 
 # Allowed extensions for file uploads
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+#def allowed_file(filename):
+#    return '.' in filename and \
+#           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Connect to DB
 
@@ -102,23 +102,24 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    if os.path.isfile('static/average.json'):
-        try:
-            colorProfile = 'gr'
-            settings = MapSettings(colorProfile)
-            settings.mapTitle = "Long-term Average Concentration"
+    return('Hello world')
+    #if os.path.isfile('static/average.json'):
+    #    try:
+    #        colorProfile = 'gr'
+    #        settings = MapSettings(colorProfile)
+    #        settings.mapTitle = "Long-term Average Concentration"
 
-            with open('static/average.json', 'r') as f:
-                averageGrid = f.read().replace('\n', '')
+    #        with open('static/average.json', 'r') as f:
+    #            averageGrid = f.read().replace('\n', '')
 
-        except Exception as e:
-            flash('Error generating map: ' + str(e), 'danger')
-            return redirect(subd + '/error')
+    #    except Exception as e:
+    #        flash('Error generating map: ' + str(e), 'danger')
+    #        return redirect(subd + '/error')
 
-        return render_template('maps/average.html', subd=subd, settings=json.dumps(settings.toJSON(), cls=ComplexEncoder), grid=averageGrid
+    #    return render_template('maps/average.html', subd=subd, settings=json.dumps(settings.toJSON(), cls=ComplexEncoder), grid=averageGrid
                                )
-    else:
-        return render_template('maps/average.html', subd=subd, settings=False)
+    #else:
+    #    return render_template('maps/average.html', subd=subd, settings=False)
 
 # Register form class
 
@@ -437,55 +438,55 @@ def index():
 #        abort(404)
 
 
-class MapSettings:
+#class MapSettings:
 
-    def __init__(self, colorProfile):
-        self.colorbar = subd + '/static/colourbar_' + colorProfile + '.png'
-        self.mapTitle = ""
-        self.binLims = []
-        self.colsHex = []
-        self.midpoint = [53.806571, -1.554926]      # centre of campus
-        # extent is [SE point, NW point]
-        self.extent = [0,0]
-        self.data = {}
+#    def __init__(self, colorProfile):
+#        self.colorbar = subd + '/static/colourbar_' + colorProfile + '.png'
+#        self.mapTitle = ""
+#        self.binLims = []
+#        self.colsHex = []
+#        self.midpoint = [53.806571, -1.554926]      # centre of campus
+#        # extent is [SE point, NW point]
+#        self.extent = [0,0]
+#        self.data = {}
 
-        self.setBinColor(colorProfile)
+#        self.setBinColor(colorProfile)
 
-    def addData(self, mapData):
-        self.data[mapData.id] = mapData
-        if len(self.data) > 1:
-            self.mapTitle = 'Concentration map for all walks on ' + \
-                str(mapData.parseYMD())
-        else:
-            self.mapTitle = 'Concentration map for walk commencing ' + mapData.startDate
+#    def addData(self, mapData):
+#        self.data[mapData.id] = mapData
+#        if len(self.data) > 1:
+#            self.mapTitle = 'Concentration map for all walks on ' + \
+#                str(mapData.parseYMD())
+#        else:
+#            self.mapTitle = 'Concentration map for walk commencing ' + mapData.startDate
 
-    def setBinColor(self, colorProfile):
-        self.binLims = GenerateCPCMap.CreateBins(
-            "static/BinLimits.csv").tolist()
-        self.colsHex = GenerateCPCMap.AssignColours(self.binLims, colorProfile)
-        if not os.path.exists(self.colorbar):
-            GenerateCPCMap.CreateColourBar(
-                self.binLims, self.colsHex, colorProfile)
+#    def setBinColor(self, colorProfile):
+#        self.binLims = GenerateCPCMap.CreateBins(
+#            "static/BinLimits.csv").tolist()
+#        self.colsHex = GenerateCPCMap.AssignColours(self.binLims, colorProfile)
+#        if not os.path.exists(self.colorbar):
+#            GenerateCPCMap.CreateColourBar(
+#                self.binLims, self.colsHex, colorProfile)
 
-    def getArrayStats(self):
-        midpoints = []
-        minpoints = []
-        maxpoints = []
-        for key in self.data:
-            arrstats = GenerateCPCMap.ArrayStats(
-                self.data[key].lats, self.data[key].lons)
-            midpoints.append(arrstats['middle'])
-            minpoints.append(arrstats['min'])
-            maxpoints.append(arrstats['max'])
-        self.midpoint = GenerateCPCMap.elementMean(midpoints).tolist()
-        self.extent[0] = GenerateCPCMap.elementMin(minpoints).tolist()
-        self.extent[1] = GenerateCPCMap.elementMax(maxpoints).tolist()
+#    def getArrayStats(self):
+#        midpoints = []
+#        minpoints = []
+#        maxpoints = []
+#        for key in self.data:
+#            arrstats = GenerateCPCMap.ArrayStats(
+#                self.data[key].lats, self.data[key].lons)
+#            midpoints.append(arrstats['middle'])
+#            minpoints.append(arrstats['min'])
+#            maxpoints.append(arrstats['max'])
+#        self.midpoint = GenerateCPCMap.elementMean(midpoints).tolist()
+#        self.extent[0] = GenerateCPCMap.elementMin(minpoints).tolist()
+#        self.extent[1] = GenerateCPCMap.elementMax(maxpoints).tolist()
 
-    def toJSON(self):
-        return dict(
-            colorbar=self.colorbar, mapTitle=self.mapTitle, binLims=self.binLims, colsHex=self.colsHex, midpoint=self.midpoint, minpoint=self.extent[
-                0], maxpoint=self.extent[1], data=self.data
-        )
+#    def toJSON(self):
+#        return dict(
+#            colorbar=self.colorbar, mapTitle=self.mapTitle, binLims=self.binLims, colsHex=self.colsHex, midpoint=self.midpoint, minpoint=self.extent[
+#                0], maxpoint=self.extent[1], data=self.data
+#        )
 
 
 #class MapData:
@@ -529,71 +530,71 @@ class MapSettings:
 #        )
 
 
-class Grid:
+#class Grid:
     
-    def __init__(self, csv):
-        self.cells = []
+#    def __init__(self, csv):
+#        self.cells = []
 
-        shpCells = SpatialAnalysis.ReadGeoJSON('static/' + csv)
-        for shpCell in shpCells:
-            cell = Cell(shpCell)
-            self.cells.append(cell)
+#        shpCells = SpatialAnalysis.ReadGeoJSON('static/' + csv)
+#        for shpCell in shpCells:
+#            cell = Cell(shpCell)
+#            self.cells.append(cell)
     
-    def getAverage(self, data):
-        for dataset in data:
-            self.cells = SpatialAnalysis.SpatialJoin(data[dataset], self.cells)
+#    def getAverage(self, data):
+#        for dataset in data:
+#            self.cells = SpatialAnalysis.SpatialJoin(data[dataset], self.cells)
 
-        for cell in self.cells:
-            cell.average()
+#        for cell in self.cells:
+#            cell.average()
 
-    def toJSON(self):
-        return dict(
-            cells=self.cells
-        )
-
-
-class Cell:
-
-    def __init__(self, polygon):
-        self.lats = []
-        self.lons = []
-        self.concs = []
-        self.polygon = polygon
-        self.centroid = []
-        self.concMedian = 0
-        for lat in polygon.boundary.xy[0]:
-            self.lats.append(lat)
-        for lons in polygon.boundary.xy[1]:
-            self.lons.append(lons)
-        self.centroid = [polygon.centroid.x, polygon.centroid.y]
-
-    def average(self):
-        if self.concs:
-            self.concMedian = GenerateCPCMap.Median(self.concs)
-
-    def toJSON(self):
-        return dict(
-            lats=self.lats, lons=self.lons, conc=self.concMedian, centroid=self.centroid
-        )
+#    def toJSON(self):
+#        return dict(
+#            cells=self.cells
+#        )
 
 
-class ComplexEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if hasattr(obj, 'toJSON'):
-            return obj.toJSON()
-        else:
-            return json.JSONEncoder.default(self, obj)
+#class Cell:
+
+#    def __init__(self, polygon):
+#        self.lats = []
+#        self.lons = []
+#        self.concs = []
+#        self.polygon = polygon
+#        self.centroid = []
+#        self.concMedian = 0
+#        for lat in polygon.boundary.xy[0]:
+#            self.lats.append(lat)
+#        for lons in polygon.boundary.xy[1]:
+#            self.lons.append(lons)
+#        self.centroid = [polygon.centroid.x, polygon.centroid.y]
+
+#    def average(self):
+#        if self.concs:
+#            self.concMedian = GenerateCPCMap.Median(self.concs)
+
+#    def toJSON(self):
+#        return dict(
+#            lats=self.lats, lons=self.lons, conc=self.concMedian, centroid=self.centroid
+#        )
+
+
+#class ComplexEncoder(json.JSONEncoder):
+#    def default(self, obj):
+#        if hasattr(obj, 'toJSON'):
+#            return obj.toJSON()
+#        else:
+#            return json.JSONEncoder.default(self, obj)
 
 
 # Error
-@app.route('/error')
-def error():
-    return render_template('error.html')
+#@app.route('/error')
+#def error():
+#    return render_template('error.html')
 
 
-@app.route('/privacy', methods=["GET"])
-def privacy():
-    return render_template('privacy.html.j2')
+#@app.route('/privacy', methods=["GET"])
+#def privacy():
+#    return render_template('privacy.html.j2')
 
 
 if __name__ == '__main__':
