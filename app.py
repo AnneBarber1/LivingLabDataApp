@@ -118,7 +118,7 @@ def index():
     #        return redirect(subd + '/error')
 
     #    return render_template('maps/average.html', subd=subd, settings=json.dumps(settings.toJSON(), cls=ComplexEncoder), grid=averageGrid
-                               )
+    #                           )
     #else:
     #    return render_template('maps/average.html', subd=subd, settings=False)
 
