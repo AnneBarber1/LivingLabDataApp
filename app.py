@@ -16,10 +16,10 @@ import requests
 from io import StringIO
 
 app = Flask(__name__)
-assert os.path.exists('AppSecretKey.txt'), "Unable to locate app secret key"
-with open('AppSecretKey.txt', 'r') as f:
-    key = f.read()
-app.secret_key = key
+#assert os.path.exists('AppSecretKey.txt'), "Unable to locate app secret key"
+#with open('AppSecretKey.txt', 'r') as f:
+#    key = f.read()
+#app.secret_key = key
 CPC_DIR = 'CPCFiles'
 GPS_DIR = 'GPSFiles'
 MAP_DIR = 'templates/maps'
@@ -28,14 +28,15 @@ CPC_DEL_DIR = DEL_DIR + '/' + CPC_DIR
 GPS_DEL_DIR = DEL_DIR + '/' + GPS_DIR
 OPC_DIR = 'OPCFiles'
 ALLOWED_EXTENSIONS = set(['csv'])
-DATABASE = 'LivingLabDataApp.db'
-assert os.path.exists(DATABASE), "Unable to locate database"
-assert os.path.exists('StravaTokens.txt'), "Unable to locate Strava tokens"
+#DATABASE = 'LivingLabDataApp.db'
+#assert os.path.exists(DATABASE), "Unable to locate database"
+#assert os.path.exists('StravaTokens.txt'), "Unable to locate Strava tokens"
 
 # Set subdomain...
 # If running locally (or index is the domain) set to blank, i.e. subd=""
 # If index is a subdomain, set as appropriate *including* leading slash, e.g. subd="/living-lab"
-subd = "/living-lab"
+#subd = "/living-lab"
+subd = ""
 
 # Create directories if needed:
 if not os.path.isdir(CPC_DIR):
@@ -71,30 +72,30 @@ def allowed_file(filename):
 # Connect to DB
 
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row
-    return db
+#def get_db():
+#    db = getattr(g, '_database', None)
+#    if db is None:
+#        db = g._database = sqlite3.connect(DATABASE)
+#        db.row_factory = sqlite3.Row
+#    return db
 
 # Close DB if app stops
 
 
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+#@app.teardown_appcontext
+#def close_connection(exception):
+#    db = getattr(g, '_database', None)
+#    if db is not None:
+#        db.close()
 
 # Query DB
 
 
-def query_db(query, args=(), one=False):
-    cur = get_db().execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else (rv if rv else None)
+#def query_db(query, args=(), one=False):
+#    cur = get_db().execute(query, args)
+#    rv = cur.fetchall()
+#    cur.close()
+#    return (rv[0] if rv else None) if one else (rv if rv else None)
 
 # Index
 
@@ -122,318 +123,318 @@ def index():
 # Register form class
 
 
-class RegisterForm(Form):
-    name = StringField('Name', [validators.Length(min=1, max=50)])
-    username = StringField('Username', [validators.Length(min=4, max=25)])
-    email = StringField('Email', [validators.Length(min=6, max=50)])
-    password = PasswordField('Password', [
-        validators.DataRequired(),
-        validators.EqualTo('confirm', message='Passwords do no match')
-    ])
-    confirm = PasswordField('Confirm Password')
+#class RegisterForm(Form):
+#    name = StringField('Name', [validators.Length(min=1, max=50)])
+#    username = StringField('Username', [validators.Length(min=4, max=25)])
+#    email = StringField('Email', [validators.Length(min=6, max=50)])
+#    password = PasswordField('Password', [
+#        validators.DataRequired(),
+#        validators.EqualTo('confirm', message='Passwords do no match')
+#    ])
+#    confirm = PasswordField('Confirm Password')
 
 
 # User register
-@app.route('/register-a-new-user', methods=['GET', 'POST'])
-def register():
-    # Redirect if already logged in
-    if 'logged_in' in session:
-        flash('Log out first to register a new user', 'danger')
-        return redirect(subd + '/')
-    # Otherwise...
-    form = RegisterForm(request.form)
-    if request.method == 'POST' and form.validate():
-        name = form.name.data
-        email = form.email.data
-        username = form.username.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+#@app.route('/register-a-new-user', methods=['GET', 'POST'])
+#def register():
+#    # Redirect if already logged in
+#    if 'logged_in' in session:
+#        flash('Log out first to register a new user', 'danger')
+#        return redirect(subd + '/')
+#    # Otherwise...
+#    form = RegisterForm(request.form)
+#    if request.method == 'POST' and form.validate():
+#        name = form.name.data
+#        email = form.email.data
+#        username = form.username.data
+#        password = sha256_crypt.encrypt(str(form.password.data))
+        
+#        # Check username is unique
+#        result = query_db('SELECT * FROM users WHERE username = ?', [username])
+#        if result is not None:
+#            flash('Username already exists', 'danger')
+#            return redirect(subd + '/register-a-new-user')
 
-        # Check username is unique
-        result = query_db('SELECT * FROM users WHERE username = ?', [username])
-        if result is not None:
-            flash('Username already exists', 'danger')
-            return redirect(subd + '/register-a-new-user')
+#        # Create cursor
+#        db = get_db()
+#        cur = db.cursor()
+#        # Execute query:
+#        cur.execute("INSERT INTO users(name, email, username, password) VALUES(?, ?, ?, ?)",
+#                    (name, email, username, password))
+#        # Commit to DB
+#        db.commit()
+#        # Close connection
+#        cur.close()
 
-        # Create cursor
-        db = get_db()
-        cur = db.cursor()
-        # Execute query:
-        cur.execute("INSERT INTO users(name, email, username, password) VALUES(?, ?, ?, ?)",
-                    (name, email, username, password))
-        # Commit to DB
-        db.commit()
-        # Close connection
-        cur.close()
+#        flash('You are now registered and can log in', 'success')
 
-        flash('You are now registered and can log in', 'success')
-
-        return redirect(subd + '/login')
-    return render_template('register.html', form=form, subd=subd)
+#        return redirect(subd + '/login')
+#    return render_template('register.html', form=form, subd=subd)
 
 
 # User login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    # Redirect if already logged in
-    if 'logged_in' in session:
-        flash('You are already logged in', 'success')
-        return redirect(subd + '/')
-    if request.method == 'POST':
-        # Get form fields
-        username = request.form['username']
-        password_candidate = request.form['password']
-        result = query_db('SELECT * FROM users WHERE username = ?', [username])
-        if result is not None:
-            data = query_db(
-                'SELECT * FROM users WHERE username = ?', [username], one=True)
-            password = data['password']
-            # Compare passwords
-            if sha256_crypt.verify(password_candidate, password):
-                # Passed
-                session['logged_in'] = True
-                session['username'] = username
-                flash('You are now logged in', 'success')
-                return redirect(subd + '/')
-            else:
-                error = 'Invalid login'
-                return render_template('login.html', error=error, subd=subd)
-        else:
-            error = 'Username not found'
-            return render_template('login.html', error=error, subd=subd)
+#@app.route('/login', methods=['GET', 'POST'])
+#def login():
+#    # Redirect if already logged in
+#    if 'logged_in' in session:
+#        flash('You are already logged in', 'success')
+#        return redirect(subd + '/')
+#    if request.method == 'POST':
+#        # Get form fields
+#        username = request.form['username']
+#        password_candidate = request.form['password']
+#        result = query_db('SELECT * FROM users WHERE username = ?', [username])
+#        if result is not None:
+#            data = query_db(
+#                'SELECT * FROM users WHERE username = ?', [username], one=True)
+#            password = data['password']
+#            # Compare passwords
+#            if sha256_crypt.verify(password_candidate, password):
+#                # Passed
+#                session['logged_in'] = True
+#                session['username'] = username
+#                flash('You are now logged in', 'success')
+#                return redirect(subd + '/')
+#            else:
+#                error = 'Invalid login'
+#                return render_template('login.html', error=error, subd=subd)
+#        else:
+#            error = 'Username not found'
+#            return render_template('login.html', error=error, subd=subd)
 
-    return render_template('login.html', subd=subd)
+#    return render_template('login.html', subd=subd)
 
 
 # Check if user is logged in
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Unauthorised, please login', 'danger')
-            return redirect(subd + '/login')
-    return wrap
+#def is_logged_in(f):
+#    @wraps(f)
+#    def wrap(*args, **kwargs):
+#        if 'logged_in' in session:
+#            return f(*args, **kwargs)
+#        else:
+#            flash('Unauthorised, please login', 'danger')
+#            return redirect(subd + '/login')
+#    return wrap
 
 
 # Logout
-@app.route('/logout')
-@is_logged_in
-def logout():
-    session.clear()
-    flash('You are now logged out', 'success')
-    return redirect(subd + '/login')
+#@app.route('/logout')
+#@is_logged_in
+#def logout():
+#    session.clear()
+#    flash('You are now logged out', 'success')
+#    return redirect(subd + '/login')
 
 
-@app.route('/staticdata', methods=['GET', 'POST'])
-def staticdata():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part', 'danger')
-            return Response("{'a':'b'}", status=415, mimetype='application/json')
-        file = request.files['file']
-        # No selected file
-        if file.filename == '':
-            return Response("{'a':'b'}", status=403, mimetype='application/json')
-        # Else upload file (unless bad extension)
-        if file and allowed_file(file.filename):
-            try:
-                OPCText = file.read().decode("utf-8")
-            except Exception:
-                raise
-            # Add entry to OPCFiles DB
-            if query_db('SELECT id FROM OPCFiles WHERE filename = ?', (file.filename,), one=True) is None:
-                # Create cursor
-                location = file.filename.split('_')[0]
-                if location == '':
-                    location = 'UNDEFINED'
+#@app.route('/staticdata', methods=['GET', 'POST'])
+#def staticdata():
+#    if request.method == 'POST':
+#        if 'file' not in request.files:
+#            flash('No file part', 'danger')
+#            return Response("{'a':'b'}", status=415, mimetype='application/json')
+#        file = request.files['file']
+#        # No selected file
+#        if file.filename == '':
+#            return Response("{'a':'b'}", status=403, mimetype='application/json')
+#        # Else upload file (unless bad extension)
+#        if file and allowed_file(file.filename):
+#            try:
+#                OPCText = file.read().decode("utf-8")
+#            except Exception:
+#                raise
+#            # Add entry to OPCFiles DB
+#            if query_db('SELECT id FROM OPCFiles WHERE filename = ?', (file.filename,), one=True) is None:
+#                # Create cursor
+#                location = file.filename.split('_')[0]
+#                if location == '':
+#                    location = 'UNDEFINED'
 
-                db = get_db()
-                cur = db.cursor()
-                # Execute query:
-                cur.execute("INSERT INTO OPCFiles(filename, location) VALUES (?,?)",
-                            (secure_filename(file.filename), location))
-                # Commit to DB
-                db.commit()
-                # Close connection
-                cur.close()
+#                db = get_db()
+#                cur = db.cursor()
+#                # Execute query:
+#                cur.execute("INSERT INTO OPCFiles(filename, location) VALUES (?,?)",
+#                            (secure_filename(file.filename), location))
+#                # Commit to DB
+#                db.commit()
+#                # Close connection
+#                cur.close()
 
-            # .write() deletes original on collision
-            OPCFile = open(OPC_DIR + '/' + file.filename,
-                           'w', encoding='utf-8')
-            OPCFile.write(OPCText)
-            OPCFile.close()
-            return Response("{'a':'b'}", status=201, mimetype='application/json')
-        else:
-            return Response("{'a':'b'}", status=406, mimetype='application/json')
-    AllOPCFiles = query_db('SELECT * FROM OPCFiles')
-    if AllOPCFiles is not None:
-        # AllOPCFiles = reversed(AllOPCFiles)
-        return render_template('static.html', AllOPCFiles=AllOPCFiles, LoggedIn=('logged_in' in session), subd=subd)
-    else:
-        return render_template('static.html', LoggedIn=('logged_in' in session), subd=subd)
+#            # .write() deletes original on collision
+#            OPCFile = open(OPC_DIR + '/' + file.filename,
+#                           'w', encoding='utf-8')
+#            OPCFile.write(OPCText)
+#            OPCFile.close()
+#            return Response("{'a':'b'}", status=201, mimetype='application/json')
+#        else:
+#            return Response("{'a':'b'}", status=406, mimetype='application/json')
+#    AllOPCFiles = query_db('SELECT * FROM OPCFiles')
+#    if AllOPCFiles is not None:
+#        # AllOPCFiles = reversed(AllOPCFiles)
+#        return render_template('static.html', AllOPCFiles=AllOPCFiles, LoggedIn=('logged_in' in session), subd=subd)
+#    else:
+#        return render_template('static.html', LoggedIn=('logged_in' in session), subd=subd)
 
 
-@app.route('/staticdata/<string:id>', methods=['POST'])
-def downloadOPCData(id):
-    filename = query_db('SELECT * FROM OPCFiles WHERE id = ?',
-                        (id,), one=True)['filename']
-    if os.path.exists(OPC_DIR + '/' + filename):
-        return send_from_directory(OPC_DIR, filename, as_attachment=True, attachment_filename=filename)
-    else:
-        abort(404)
+#@app.route('/staticdata/<string:id>', methods=['POST'])
+#def downloadOPCData(id):
+#    filename = query_db('SELECT * FROM OPCFiles WHERE id = ?',
+#                        (id,), one=True)['filename']
+#    if os.path.exists(OPC_DIR + '/' + filename):
+#        return send_from_directory(OPC_DIR, filename, as_attachment=True, attachment_filename=filename)
+#    else:
+#        abort(404)
 
 
 # Uploads
-@app.route('/uploads', methods=["GET", "POST"])
-@is_logged_in
-def uploads():
-    # If user tries to upload a file
-    if request.method == 'POST':
-        # No file part:
-        if 'file' not in request.files:
-            flash('No file part', 'danger')
-            return redirect(subd + '/uploads')
-        # Get file info
-        file = request.files['file']
-        # No selected file
-        if file.filename == '':
-            flash('No file selected', 'danger')
-            return redirect(subd + '/uploads')
-        # Else upload file (unless bad extension)
-        if file and allowed_file(file.filename):
-            try:
-                CPCtext = file.read().decode("iso8859_15")
-                CPCData, CPCdate, CPClen = GenerateCPCMap.ReadCPCFile(CPCtext)
-                GPSData = GenerateCPCMap.FetchGPSData(
-                    'StravaTokens.txt', CPCdate, CPClen)
-                MergeData = GenerateCPCMap.NearestNghbr(CPCData, GPSData)
-            except Exception:
-                raise
-            # Add entry to CPCFiles DB
-            # Create cursor
-            db = get_db()
-            cur = db.cursor()
-            # Execute query:
-            cur.execute("INSERT INTO CPCFiles(filename, username, start_date) VALUES(?, ?, ?)",
-                        (secure_filename(file.filename), session['username'], CPCdate))
-            # Commit to DB
-            db.commit()
-            # Close connection
-            cur.close()
-            # Save CPC file, renaming based on DB ID
-            lastID = query_db(
-                'SELECT * FROM CPCFiles ORDER BY id DESC LIMIT 1', one=True)['id']
-            CPCFile = open(CPC_DIR + '/CPC_' + str(lastID) +
-                           '.csv', 'w', encoding='iso8859_15')
-            CPCFile.write(CPCtext)
-            CPCFile.close()
-            # save GPS dataframe
-            GPSData.to_pickle(GPS_DIR + '/GPS_' + str(lastID) + '.pkl')
-            # calculate averages
-            results = query_db('SELECT * FROM CPCFiles')
-            dataset = {}
-            for result in results:
-                data = MapData(result['id'])
-                dataset[data.id] = data
-            grid = Grid('hex.geojson')
-            grid.getAverage(dataset)
-            with open('static/average.json', 'w+') as f:
-                f.seek(0)
-                json.dump(grid.toJSON(), f, cls=ComplexEncoder, indent=1)
-            # return
-            flash('File uploaded', 'success')
-            return redirect(subd + '/uploads')
-        else:
-            flash('Only .csv files allowed', 'danger')
-            return redirect(subd + '/uploads')
-    # If user just navigates to page
-    AllCPCFiles = query_db('SELECT * FROM CPCFiles')
-    if AllCPCFiles is not None:
-        # AllCPCFiles = reversed(AllCPCFiles)
-        return render_template('uploads.html', AllCPCFiles=AllCPCFiles, LoggedIn=('logged_in' in session), subd=subd)
-    else:
-        return render_template('uploads.html', LoggedIn=('logged_in' in session), subd=subd)
+#@app.route('/uploads', methods=["GET", "POST"])
+#@is_logged_in
+#def uploads():
+#    # If user tries to upload a file
+#    if request.method == 'POST':
+#        # No file part:
+#        if 'file' not in request.files:
+#            flash('No file part', 'danger')
+#            return redirect(subd + '/uploads')
+#        # Get file info
+#        file = request.files['file']
+#        # No selected file
+#        if file.filename == '':
+#            flash('No file selected', 'danger')
+#            return redirect(subd + '/uploads')
+#        # Else upload file (unless bad extension)
+#        if file and allowed_file(file.filename):
+#            try:
+#                CPCtext = file.read().decode("iso8859_15")
+#                CPCData, CPCdate, CPClen = GenerateCPCMap.ReadCPCFile(CPCtext)
+#                GPSData = GenerateCPCMap.FetchGPSData(
+#                    'StravaTokens.txt', CPCdate, CPClen)
+#                MergeData = GenerateCPCMap.NearestNghbr(CPCData, GPSData)
+#            except Exception:
+#                raise
+#            # Add entry to CPCFiles DB
+#            # Create cursor
+#            db = get_db()
+#            cur = db.cursor()
+#            # Execute query:
+#            cur.execute("INSERT INTO CPCFiles(filename, username, start_date) VALUES(?, ?, ?)",
+#                        (secure_filename(file.filename), session['username'], CPCdate))
+#            # Commit to DB
+#            db.commit()
+#            # Close connection
+#            cur.close()
+#            # Save CPC file, renaming based on DB ID
+#            lastID = query_db(
+#                'SELECT * FROM CPCFiles ORDER BY id DESC LIMIT 1', one=True)['id']
+#            CPCFile = open(CPC_DIR + '/CPC_' + str(lastID) +
+#                           '.csv', 'w', encoding='iso8859_15')
+#            CPCFile.write(CPCtext)
+#            CPCFile.close()
+#            # save GPS dataframe
+#            GPSData.to_pickle(GPS_DIR + '/GPS_' + str(lastID) + '.pkl')
+#            # calculate averages
+#            results = query_db('SELECT * FROM CPCFiles')
+#            dataset = {}
+#            for result in results:
+#                data = MapData(result['id'])
+#                dataset[data.id] = data
+#            grid = Grid('hex.geojson')
+#            grid.getAverage(dataset)
+#            with open('static/average.json', 'w+') as f:
+#                f.seek(0)
+#                json.dump(grid.toJSON(), f, cls=ComplexEncoder, indent=1)
+#            # return
+#            flash('File uploaded', 'success')
+#            return redirect(subd + '/uploads')
+#        else:
+#            flash('Only .csv files allowed', 'danger')
+#            return redirect(subd + '/uploads')
+#    # If user just navigates to page
+#    AllCPCFiles = query_db('SELECT * FROM CPCFiles')
+#    if AllCPCFiles is not None:
+#        # AllCPCFiles = reversed(AllCPCFiles)
+#        return render_template('uploads.html', AllCPCFiles=AllCPCFiles, LoggedIn=('logged_in' in session), subd=subd)
+#    else:
+#        return render_template('uploads.html', LoggedIn=('logged_in' in session), subd=subd)
 
 
 # Maps
-@app.route('/maps/<string:id>')
-@is_logged_in
-def maps(id):
-    if not os.path.exists(GPS_DIR + '/GPS_' + id + '.pkl'):
-        abort(404)
+#@app.route('/maps/<string:id>')
+#@is_logged_in
+#def maps(id):
+#    if not os.path.exists(GPS_DIR + '/GPS_' + id + '.pkl'):
+#        abort(404)
 
-    type = request.args.get('type') if request.args.get('type') else 'single'
-    colorProfile = request.args.get(
-        'color') if request.args.get('color') else 'gr'
+#    type = request.args.get('type') if request.args.get('type') else 'single'
+#    colorProfile = request.args.get(
+#        'color') if request.args.get('color') else 'gr'
 
-    settings = MapSettings(colorProfile)
-    mapClass = MapData(id)
+#    settings = MapSettings(colorProfile)
+#    mapClass = MapData(id)
 
-    if type == "multi":
-        startYMD = mapClass.parseYMD()
-        results = query_db(
-            'SELECT * FROM CPCFiles WHERE start_date LIKE ?', (str(startYMD) + '%',))
+#    if type == "multi":
+#        startYMD = mapClass.parseYMD()
+#        results = query_db(
+#            'SELECT * FROM CPCFiles WHERE start_date LIKE ?', (str(startYMD) + '%',))
 
-        for result in results:
-            settings.addData(MapData(result['id']))
-    elif type == 'single':
-        settings.addData(mapClass)
-    else:
-        abort(404)
+#        for result in results:
+#            settings.addData(MapData(result['id']))
+#    elif type == 'single':
+#        settings.addData(mapClass)
+#    else:
+#        abort(404)
 
-    settings.getArrayStats()
-    datetime = parse(mapClass.startDate)
-    try:
-        weatherData = Weather.fetchWeatherData(datetime)
-    except:
-        weatherData = False
+#    settings.getArrayStats()
+#    datetime = parse(mapClass.startDate)
+#    try:
+#        weatherData = Weather.fetchWeatherData(datetime)
+#    except:
+#        weatherData = False
 
-    settings.getArrayStats()
+#    settings.getArrayStats()
 
-    return render_template('maps/index.html', subd=subd, settings=json.dumps(settings.toJSON(), cls=ComplexEncoder), weather=json.dumps(weatherData))
+#    return render_template('maps/index.html', subd=subd, settings=json.dumps(settings.toJSON(), cls=ComplexEncoder), weather=json.dumps(weatherData))
 
 
 # Delete CPC file
-@app.route('/delete_CPCFile/<string:id>', methods=['POST'])
-@is_logged_in
-def delete_CPCFile(id):
-    # Get start date of entry to be deleted
-    delDate = parse(
-        query_db('SELECT * FROM CPCFiles WHERE id = ?', (id,), one=True)['start_date'])
+#@app.route('/delete_CPCFile/<string:id>', methods=['POST'])
+#@is_logged_in
+#def delete_CPCFile(id):
+#    # Get start date of entry to be deleted
+#    delDate = parse(
+#        query_db('SELECT * FROM CPCFiles WHERE id = ?', (id,), one=True)['start_date'])
 
-    # Create cursor
-    db = get_db()
-    cur = db.cursor()
-    # Execute query:
-    cur.execute("DELETE FROM CPCFiles WHERE id = ?", [id])
-    # Commit to DB
-    db.commit()
-    # Close connection
-    cur.close()
+#    # Create cursor
+#    db = get_db()
+#    cur = db.cursor()
+#    # Execute query:
+#    cur.execute("DELETE FROM CPCFiles WHERE id = ?", [id])
+#    # Commit to DB
+#    db.commit()
+#    # Close connection
+#    cur.close()
 
-    # Move associated files to a 'deleted' directory
-    if os.path.exists(CPC_DIR + '/CPC_' + id + '.csv'):
-        os.rename(CPC_DIR + '/CPC_' + id + '.csv',
-                  CPC_DEL_DIR + '/CPC_' + id + '.csv')
-    if os.path.exists(GPS_DIR + '/GPS_' + id + '.pkl'):
-        os.rename(GPS_DIR + '/GPS_' + id + '.pkl',
-                  GPS_DEL_DIR + '/GPS_' + id + '.pkl')
+#    # Move associated files to a 'deleted' directory
+#    if os.path.exists(CPC_DIR + '/CPC_' + id + '.csv'):
+#        os.rename(CPC_DIR + '/CPC_' + id + '.csv',
+#                  CPC_DEL_DIR + '/CPC_' + id + '.csv')
+#    if os.path.exists(GPS_DIR + '/GPS_' + id + '.pkl'):
+#        os.rename(GPS_DIR + '/GPS_' + id + '.pkl',
+#                  GPS_DEL_DIR + '/GPS_' + id + '.pkl')
 
-    flash('CPC file deleted', 'success')
-    return redirect(subd + '/uploads')
+#    flash('CPC file deleted', 'success')
+#    return redirect(subd + '/uploads')
 
 
 # Download CPC file
-@app.route('/download/<string:id>', methods=['POST'])
-@is_logged_in
-def download(id):
-    filename = query_db('SELECT * FROM CPCFiles WHERE id = ?',
-                        (id,), one=True)['filename']
-    if os.path.exists(CPC_DIR + '/CPC_' + id + '.csv'):
-        return send_from_directory(CPC_DIR, 'CPC_' + id + '.csv', as_attachment=True, attachment_filename=filename)
-    else:
-        abort(404)
+#@app.route('/download/<string:id>', methods=['POST'])
+#@is_logged_in
+#def download(id):
+#    filename = query_db('SELECT * FROM CPCFiles WHERE id = ?',
+#                        (id,), one=True)['filename']
+#    if os.path.exists(CPC_DIR + '/CPC_' + id + '.csv'):
+#        return send_from_directory(CPC_DIR, 'CPC_' + id + '.csv', as_attachment=True, attachment_filename=filename)
+#    else:
+#        abort(404)
 
 
 class MapSettings:
@@ -487,49 +488,49 @@ class MapSettings:
         )
 
 
-class MapData:
+#class MapData:
 
-    def __init__(self, id):
-        # if id not in query_db('SELECT * FROM CPCFiles', one=False)['id']:
-        #     abort(404)
+#    def __init__(self, id):
+#        # if id not in query_db('SELECT * FROM CPCFiles', one=False)['id']:
+#        #     abort(404)
 
-        self.id = id
-        self.lats = []
-        self.lons = []
-        self.concs = []
+#        self.id = id
+#        self.lats = []
+#        self.lons = []
+#        self.concs = []
 
-        self.dbquery = query_db(
-            'SELECT * FROM CPCFiles WHERE id = ?', (id,), one=True)
-        self.startDate = self.dbquery['start_date']
-        self.getData()
+#        self.dbquery = query_db(
+#            'SELECT * FROM CPCFiles WHERE id = ?', (id,), one=True)
+#        self.startDate = self.dbquery['start_date']
+#        self.getData()
 
-    def parseYMD(self):
-        parseDate = parse(self.startDate)
-        return dt.date(parseDate.year, parseDate.month, parseDate.day)
+#    def parseYMD(self):
+#        parseDate = parse(self.startDate)
+#        return dt.date(parseDate.year, parseDate.month, parseDate.day)
 
-    def getData(self):
-        try:
-            with open(CPC_DIR + '/CPC_' + str(self.id) + '.csv', 'r', encoding='iso8859_15') as CPCFile:
-                CPCtext = CPCFile.read()
-                CPCData, CPCdate, CPClen = GenerateCPCMap.ReadCPCFile(CPCtext)
-            GPSData = pandas.read_pickle(
-                GPS_DIR + '/GPS_' + str(self.id) + '.pkl')
-            MergeData = GenerateCPCMap.NearestNghbr(CPCData, GPSData)
-            self.lats = MergeData['lat']
-            self.lons = MergeData['lon']
-            self.concs = MergeData['conc']
-        except Exception as e:
-            flash('Error generating map: ' + str(e), 'danger')
-            return redirect(subd + '/error')
+#    def getData(self):
+#        try:
+#            with open(CPC_DIR + '/CPC_' + str(self.id) + '.csv', 'r', encoding='iso8859_15') as CPCFile:
+#                CPCtext = CPCFile.read()
+#                CPCData, CPCdate, CPClen = GenerateCPCMap.ReadCPCFile(CPCtext)
+#            GPSData = pandas.read_pickle(
+#                GPS_DIR + '/GPS_' + str(self.id) + '.pkl')
+#            MergeData = GenerateCPCMap.NearestNghbr(CPCData, GPSData)
+#            self.lats = MergeData['lat']
+#            self.lons = MergeData['lon']
+#            self.concs = MergeData['conc']
+#        except Exception as e:
+#            flash('Error generating map: ' + str(e), 'danger')
+#            return redirect(subd + '/error')
 
-    def toJSON(self):
-        return dict(
-            id=self.id, lats=self.lats.tolist(), lons=self.lons.tolist(), concs=self.concs.tolist(), startDate=self.startDate
-        )
+#    def toJSON(self):
+#        return dict(
+#            id=self.id, lats=self.lats.tolist(), lons=self.lons.tolist(), concs=self.concs.tolist(), startDate=self.startDate
+#        )
 
 
 class Grid:
-
+    
     def __init__(self, csv):
         self.cells = []
 
@@ -537,7 +538,7 @@ class Grid:
         for shpCell in shpCells:
             cell = Cell(shpCell)
             self.cells.append(cell)
-
+    
     def getAverage(self, data):
         for dataset in data:
             self.cells = SpatialAnalysis.SpatialJoin(data[dataset], self.cells)
@@ -596,4 +597,4 @@ def privacy():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
